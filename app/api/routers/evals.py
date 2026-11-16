@@ -13,7 +13,7 @@ from app.schemas.evals import (
 )
 from app.enums import EvalStatus
 from app.exceptions import DatasetNotFoundError
-from app.evals.dataset import load_dataset, list_datasets
+from app.evals.dataset.dataset import load_dataset, list_datasets
 from app.evals.reports.generator import generate_markdown
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/evals", tags=["evals"])
 
 async def _execute_eval(eval_id: str, body: EvalRunRequest):
     """Background task: run eval and persist results."""
-    from app.evals.runner import run_eval
+    from app.evals.evaluators.runner import run_eval
 
     maker = _sessionmaker()
     async with maker() as session:
@@ -125,5 +125,5 @@ async def get_eval_report(
     report_data = eval_run.summary_payload or {}
     if format == "md":
         from fastapi.responses import PlainTextResponse
-        return PlainTextResponse(generate_markdown(report_data), media_type="text/markdown")
+        return PlainTextResponse(generate_markdown(report_data), media_type="text/markdown")##===================================
     return report_data

@@ -11,8 +11,8 @@ Flow:
 
 import logging
 
-from app.evals.dataset import load_dataset
-from app.evals.comparator import compare
+from app.evals.dataset.dataset import load_dataset
+from app.evals.gate.comparator import compare
 from app.schemas.evals import DatasetCase
 
 logger = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ async def run_eval(
     evaluators: list[str] | None = None,
 ) -> dict:
     """Run evaluation against a full dataset and return aggregated summary."""
-    cases = load_dataset(dataset_name)
+    cases = load_dataset(dataset_name)##===================================
     evaluator_names = evaluators or DEFAULT_EVALUATORS
     evaluator_names = [e for e in evaluator_names if e in EVALUATOR_MAP]
 
@@ -54,7 +54,8 @@ async def run_eval(
     summary = _aggregate(results, evaluator_names)
     baseline_summary = _aggregate(baseline_results, evaluator_names) if baseline_results else None
 
-    comparison = compare(baseline_summary, summary) if baseline_summary else None
+
+    comparison = compare(baseline_summary, summary) if baseline_summary else None##===================================
 
     return {
         "eval_id": eval_id,
@@ -64,9 +65,10 @@ async def run_eval(
         "pass_count": summary["pass_count"],
         "fail_count": summary["fail_count"],
         "pass_rate": summary["pass_rate"],
-        "evaluator_breakdown": summary["evaluator_breakdown"],
+        "evaluator_breakdown": summary["evaluator_breakdown"],##===================================
         "cases": results,
-        "comparison": comparison,
+        "comparison": comparison,##===================================
+        # failed_cases
     }
 
 

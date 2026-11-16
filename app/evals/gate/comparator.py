@@ -20,14 +20,13 @@ def compare(baseline: dict, candidate: dict) -> dict:
                 "candidate": cv,
                 "delta": cv - bv,
             }
-
     return {
         "baseline": baseline,
         "candidate": candidate,
         "diff": diff,
-        "regressed": any(
+        "regressed": any(##===================================
             d.get("delta", 0) < 0
             for k, d in diff.items()
-            if k in ("pass_rate", "success_rate")
+            if k in ("pass_rate", "success_rate")##===================================
         ),
     }

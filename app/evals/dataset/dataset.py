@@ -4,10 +4,7 @@ Dataset loader - loads evaluation datasets from JSON/YAML files.
 
 import json
 from pathlib import Path
-
 from app.schemas.evals import DatasetCase
-
-
 def load_dataset(name: str, datasets_dir: str = "datasets") -> list[DatasetCase]:
     """Load a dataset by name from the datasets directory."""
     path = Path(datasets_dir) / f"{name}.json"
@@ -27,3 +24,4 @@ def list_datasets(datasets_dir: str = "datasets") -> list[str]:
     if not p.exists():
         return []
     return [f.stem for f in p.glob("*.json")]
+
