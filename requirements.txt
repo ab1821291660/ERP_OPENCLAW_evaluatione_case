@@ -11,8 +11,8 @@ celery>=5.4.0
 redis>=5.2.0
 
 # Runtime
-langgraph>=0.2.0
-langchain>=0.3.0
+langgraph>=0.2.0 ##===================================
+langchain>=0.3.0 ##===================================
 langchain-openai>=0.2.0
 
 # MCP

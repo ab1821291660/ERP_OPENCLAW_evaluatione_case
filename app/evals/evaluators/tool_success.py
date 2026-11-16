@@ -13,6 +13,7 @@ def evaluate(candidate_output: dict, expected: dict) -> dict:
             "detail": {"reason": "No tool calls recorded"},
         }
 
+
     successes = sum(1 for tc in tool_calls if not tc.get("result", {}).get("error"))
     total = len(tool_calls)
     score = successes / total if total > 0 else 0
