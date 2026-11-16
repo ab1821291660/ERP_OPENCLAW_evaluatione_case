@@ -2,7 +2,7 @@ from functools import lru_cache
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.common.config import settings
+from app.config import settings
 
 
 @lru_cache

@@ -11,10 +11,10 @@ from app.schemas.evals import (
     EvalRunCreated,
     EvalRunResponse,
 )
-from app.common.enums import EvalStatus
-from app.common.exceptions import DatasetNotFoundError
+from app.enums import EvalStatus
+from app.exceptions import DatasetNotFoundError
 from app.evals.dataset import load_dataset, list_datasets
-from app.reports.generator import generate_markdown, generate_json
+from app.evals.reports.generator import generate_markdown
 
 logger = logging.getLogger(__name__)
 

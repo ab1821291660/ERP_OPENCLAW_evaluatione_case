@@ -14,7 +14,7 @@ from app.schemas.runs import (
     RunMetrics,
     RunTraceResponse,
 )
-from app.common.enums import RunStatus
+from app.enums import RunStatus
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +113,7 @@ async def get_run(run_id: str, db: AsyncSession = Depends(get_db)) -> RunRespons
 @router.get("/{run_id}/trace", response_model=RunTraceResponse)
 async def get_run_trace(run_id: str) -> RunTraceResponse:
     """Get the full trace (spans) for a run."""
-    from app.observability.tracing import get_trace
+    from app.evals.observability.tracing import get_trace
 
     trace_data = get_trace(run_id)
     if trace_data is None:
@@ -129,7 +129,7 @@ async def get_run_trace(run_id: str) -> RunTraceResponse:
 @router.get("/{run_id}/trace/spans")
 async def get_run_trace_spans(run_id: str) -> dict:
     """Get the full span list for a run."""
-    from app.observability.tracing import get_trace
+    from app.evals.observability.tracing import get_trace
 
     trace_data = get_trace(run_id)
     if trace_data is None:

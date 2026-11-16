@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import AgentRun
-from app.common.enums import RunStatus
+from app.enums import RunStatus
 
 
 class RunRepository:

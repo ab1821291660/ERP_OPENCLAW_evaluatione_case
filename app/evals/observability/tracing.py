@@ -18,8 +18,6 @@ Span hierarchy (per the blueprint):
     └─ validate_output
 """
 
-import time
-import uuid
 from contextlib import contextmanager
 from typing import Iterator
 
@@ -29,7 +27,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExport
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 
-from app.common.config import settings
+from app.config import settings
 
 # ── In-memory span store (for trace API queries) ──
 _trace_store: dict[str, list[dict]] = {}  # run_id → list of span dicts

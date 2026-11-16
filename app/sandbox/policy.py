@@ -2,7 +2,7 @@
 Sandbox Policy - command allowlist and safety constraints.
 """
 
-from app.common.exceptions import SandboxPolicyViolation
+from app.exceptions import SandboxPolicyViolation
 
 DEFAULT_ALLOWED_COMMANDS = {
     "ls", "cat", "head", "tail", "wc", "grep", "find",

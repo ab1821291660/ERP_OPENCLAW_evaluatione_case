@@ -8,8 +8,8 @@ import time
 
 from app.runtime.graph import agent_graph
 from app.runtime.state import AgentRunState
-from app.observability.tracing import start_span, SpanContext
-from app.observability.metrics import collector, RunMetrics
+from app.evals.observability.tracing import start_span, SpanContext
+from app.evals.observability.metrics import collector, RunMetrics
 
 
 async def execute_run(

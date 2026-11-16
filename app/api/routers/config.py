@@ -3,7 +3,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
-from app.common.runtime_config import set_llm_config, get_llm_config
+from app.runtime_config import set_llm_config, get_llm_config
 
 router = APIRouter(prefix="/config", tags=["config"])
 

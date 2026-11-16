@@ -12,7 +12,7 @@ def load_dataset(name: str, datasets_dir: str = "datasets") -> list[DatasetCase]
     """Load a dataset by name from the datasets directory."""
     path = Path(datasets_dir) / f"{name}.json"
     if not path.exists():
-        from app.common.exceptions import DatasetNotFoundError
+        from app.exceptions import DatasetNotFoundError
         raise DatasetNotFoundError(name)
 
     with open(path) as f:

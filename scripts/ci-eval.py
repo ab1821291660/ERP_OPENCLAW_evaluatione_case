@@ -9,17 +9,15 @@ Environment:
     LLM_API_KEY, LLM_BASE_URL, LLM_MODEL — LLM provider config
 
 Exit codes:
-    0 — all thresholds passed
-    1 — regression detected
-    2 — execution error
+    0 — all thresholds passed##===================================##===================================
+    1 — regression detected##===================================##===================================
+    2 — execution error##===================================##===================================
 """
-
 import argparse
 import asyncio
 import json
 import os
 import sys
-
 # Allow running from project root
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

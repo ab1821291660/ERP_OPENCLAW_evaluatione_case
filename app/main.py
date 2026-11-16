@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-from app.common.config import settings
+from app.config import settings
 from app.db.models import Base
 from app.db.session import _engine
 from app.api.routers import runs, tools, evals, reports, config
@@ -174,7 +174,7 @@ async def health():
 @app.get(f"{settings.api_prefix}/metrics")
 async def platform_metrics():
     """Get aggregated platform metrics."""
-    from app.observability.metrics import collector
+    from app.evals.observability.metrics import collector
     return collector.summary()
 
 

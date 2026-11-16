@@ -6,15 +6,14 @@ Each node creates its own OTel span as a child of the root run span.
 
 import json
 import logging
-import os
 from typing import Literal
 
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, BaseMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.outputs import ChatResult, ChatGeneration
 
 from app.runtime.state import AgentRunState
-from app.observability.tracing import start_span
+from app.evals.observability.tracing import start_span
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +51,7 @@ class _MockChatModel(BaseChatModel):
 
 
 def _get_llm() -> BaseChatModel:
-    from app.common.runtime_config import get_llm_api_key, get_llm_base_url, get_llm_model
+    from app.runtime_config import get_llm_api_key, get_llm_base_url, get_llm_model
     api_key = get_llm_api_key()
     if api_key:
         from langchain_openai import ChatOpenAI

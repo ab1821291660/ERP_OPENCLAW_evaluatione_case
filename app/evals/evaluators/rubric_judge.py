@@ -5,7 +5,6 @@ Judge prompt is in Chinese for the customer_support domain.
 """
 
 import json
-import os
 
 JUDGE_PROMPT = """你是一个评测裁判。请根据以下标准对候选回答进行评分：
 
@@ -32,7 +31,7 @@ async def evaluate(candidate_output: dict, expected: dict) -> dict:
         candidate_answer=str(answer)[:2000],
     )
 
-    from app.common.runtime_config import get_llm_api_key, get_llm_base_url, get_llm_model
+    from app.runtime_config import get_llm_api_key, get_llm_base_url, get_llm_model
     api_key = get_llm_api_key()
     base_url = get_llm_base_url() or "https://api.deepseek.com"
     model = get_llm_model()

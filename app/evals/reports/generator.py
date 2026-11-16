@@ -38,10 +38,10 @@ def generate_markdown(report: dict) -> str:
         for case in summary["failed_cases"]:
             lines.append(f"- **{case.get('case_id', 'unknown')}**: {case.get('reason', 'N/A')}")
 
+
     diff = report.get("diff")
     if diff:
         lines.extend(["", "## Baseline Comparison", "", "```json", json.dumps(diff, indent=2), "```"])
-
     return "\n".join(lines)
 
 

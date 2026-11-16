@@ -22,7 +22,7 @@ class Settings:
     max_tool_calls_per_run: int = int(os.getenv("MAX_TOOL_CALLS_PER_RUN", "10"))
 
     mcp_server_dir: str = os.path.join(
-        os.path.dirname(__file__), "..", "..", "mcp_servers"
+        os.path.dirname(__file__), "", "..", "mcp_servers"
     )
 
 

@@ -11,7 +11,7 @@ from app.tool_gateway.registry import registry
 from app.tool_gateway.policy import check_policy
 from app.tool_gateway.executor import execute
 from app.tool_gateway.audit import log_invocation
-from app.observability.tracing import start_span
+from app.evals.observability.tracing import start_span
 
 
 async def invoke_tool(
@@ -21,7 +21,7 @@ async def invoke_tool(
 ) -> ToolInvocationRecord:
     spec = registry.get(tool_name)
     if spec is None:
-        from app.common.exceptions import ToolNotFoundError
+        from app.exceptions import ToolNotFoundError
         raise ToolNotFoundError(tool_name)
 
     check_policy(run_id=run_id, spec=spec, payload=payload)
