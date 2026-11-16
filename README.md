@@ -1,3 +1,39 @@
+
+
+
+
+
+
+
+## ----【见AGENT_HARNESS_PLATFORM_PLAN.md】13. 你在面试里该怎么讲这个项目
+你可以按下面这条线讲：
+1. 问题定义：Agent 最大问题不是“能不能回答”，而是“怎么稳定演进”
+2. 架构分层：runtime、tool gateway、eval、observability、infra
+3. 平台价值：把运行、评测、回归、观测串起来
+4. 工程取舍：第一版不做大 UI，优先把平台内核打通
+5. 安全意识：tool policy、sandbox、审计日志
+6. 生产思维：CI gate、K8s manifests、runbook、threat model
+这样讲，会明显比“我做了个 agent”更像 AI Infra 工程师。
+
+
+
+## ----【AI_RUNTIME_PLAYGROUND_BLUEPRINT.md】11. 简历项目描述版本
+```text
+AI Runtime Playground（个人项目）
+AI Infra / Runtime 系统项目｜C++、Python、FastAPI、OpenTelemetry
+
+- 设计并实现面向 AI Infra 的 C++/Python 混合运行时平台，采用 Python 构建控制平面，使用 C++ 实现任务调度、worker 执行与消息传递骨架。
+- 基于 OpenAI-compatible mock provider 抽象模型服务接口，将 runtime orchestration 与 provider 解耦，支持后续平滑替换为真实推理服务。
+- 设计优先级调度与多 worker 执行模型，支持任务排队、执行、结果回传以及排队时延、执行时延、总时延等指标采集。
+- 规划共享内存 ring buffer 实验路径，用于对比普通队列与共享内存方案在任务传递场景下的性能差异。
+- 集成 tracing、benchmark 和回归评测思路，为后续 AI runtime 性能优化与 CI regression gate 打基础。
+```
+
+
+##=================================== ##===================================
+##=================================== ##===================================
+##=================================== ##===================================
+##=================================== ##===================================
 # Agent Harness Platform
 
 面向 AI Agent 的工程化平台——把 Agent 从"能跑"推进到**可观测、可评测、可回归、可上线**。
