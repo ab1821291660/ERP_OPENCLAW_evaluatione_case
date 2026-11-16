@@ -8,8 +8,8 @@ import time
 
 from app.runtime.graph import agent_graph
 from app.runtime.state import AgentRunState
-from app.evals.observability.tracing import start_span, SpanContext
-from app.evals.observability.metrics import collector, RunMetrics
+from app.evals.observability.tracing import start_span, SpanContext##=================================== ##===================================
+from app.evals.observability.metrics import collector, RunMetrics ##=================================== ##===================================
 
 
 async def execute_run(
@@ -21,12 +21,12 @@ async def execute_run(
     """Execute a full agent run wrapped in a root trace span."""
     start = time.monotonic()
 
-    with start_span("agent_run", run_id=run_id, attrs={"task_type": task_type}) as root_span:
+    with start_span("agent_run", run_id=run_id, attrs={"task_type": task_type}) as root_span:##===================================
         initial_state: AgentRunState = {
             "run_id": run_id,
             "task_type": task_type,
             "user_input": user_input,
-            "context": {"span_ctx": SpanContext(root_span).ctx},
+            "context": {"span_ctx": SpanContext(root_span).ctx},##===================================
             "messages": [],
             "tool_calls": [],
             "intermediate_results": [],
@@ -36,7 +36,7 @@ async def execute_run(
         }
 
         try:
-            result = await agent_graph.ainvoke(
+            result = await agent_graph.ainvoke(##===================================##===================================
                 initial_state,
                 config={"configurable": {"run_id": run_id}},
             )
@@ -52,13 +52,15 @@ async def execute_run(
     tool_calls = result.get("tool_calls", [])
     tool_errors = sum(1 for tc in tool_calls if tc.get("result", {}).get("error"))
 
-    collector.record(RunMetrics(
-        run_id=run_id,
-        latency_ms=elapsed_ms,
-        tool_calls=len(tool_calls),
-        tool_errors=tool_errors,
-        success=result.get("status") == "completed",
-        error=result.get("error"),
-    ))
-
+    collector.record(##===================================
+                    RunMetrics(##===================================
+                                run_id=run_id,
+                                latency_ms=elapsed_ms,
+                                tool_calls=len(tool_calls),
+                                tool_errors=tool_errors,
+                                success=result.get("status") == "completed",
+                                error=result.get("error"),
+                                )
+    )
     return result
+
