@@ -1,0 +1,496 @@
+#!/usr/bin/env python3
+"""
+Run LLM Model Certification Experiments
+
+Runs a Langfuse dataset through a model under test, evaluates outputs with
+financial evaluators, and reports pass/fail certification status.
+
+Usage:
+    python run_certification.py --dataset certification/financebench-sample
+    python run_certification.py --dataset certification/financebench-v1 --model gpt-4o
+    python run_certification.py --dataset certification/fpb-sample --evaluators sentiment
+    python run_certification.py --dataset certification/financebench-v1 --threshold 0.90
+    python run_certification.py --dry-run --dataset certification/financebench-sample
+
+Environment variables:
+    LANGFUSE_PUBLIC_KEY   (required)
+    LANGFUSE_SECRET_KEY   (required)
+    LANGFUSE_BASE_URL     (default: https://cloud.langfuse.com)
+    LLM_API_KEY           (required - OpenAI-compatible API key)
+    LLM_BASE_URL          (default: https://api.openai.com/v1)
+    LLM_MODEL             (default: claude-sonnet-4-6)
+    ANTHROPIC_API_KEY     (required for Claude models via native Anthropic SDK)
+
+Prerequisites:
+    pip install 'langfuse>=5,<6' openai
+    pip install anthropic   # optional, for native Claude API
+"""
+
+import argparse
+import os
+import sys
+from datetime import datetime
+
+# OTel BatchSpanProcessor defaults backpressure when running long datasets
+# (150+ items) against a slow local Langfuse: queue saturates → silent freeze
+# near the tail. Bigger queue + smaller, more frequent batches keeps drain
+# ahead of fill. Override these env vars to disable. See README "Hangs on
+# long runs" for the diagnostic story.
+os.environ.setdefault("OTEL_BSP_MAX_QUEUE_SIZE", "20000")
+os.environ.setdefault("OTEL_BSP_SCHEDULE_DELAY", "2000")
+os.environ.setdefault("OTEL_BSP_MAX_EXPORT_BATCH_SIZE", "64")
+os.environ.setdefault("OTEL_BSP_EXPORT_TIMEOUT", "120000")
+os.environ.setdefault("LANGFUSE_FLUSH_AT", "64")
+os.environ.setdefault("LANGFUSE_FLUSH_INTERVAL", "2")
+
+try:
+    from langfuse import get_client
+    from langfuse.openai import OpenAI as LangfuseOpenAI
+except ImportError:
+    print("Error: langfuse package not installed. Run: pip install 'langfuse>=5,<6'",
+          file=sys.stderr)
+    sys.exit(1)
+
+try:
+    import anthropic
+except ImportError:
+    anthropic = None
+
+from evaluators import (
+    exact_match_evaluator,
+    numerical_accuracy_evaluator,
+    sentiment_evaluator,
+    regulatory_compliance_evaluator,
+    response_completeness_evaluator,
+    groundedness_evaluator,
+    average_score_evaluator,
+    certification_gate,
+)
+from cert_common import (
+    dataset_version,
+    model_gate_threshold,
+    queue_failed_items,
+)
+
+
+# --------------- CLI ---------------
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Run LLM model certification experiments via Langfuse"
+    )
+    parser.add_argument("--dataset", type=str, required=True,
+                        help="Langfuse dataset name (e.g., certification/financebench-sample)")
+    parser.add_argument("--model", type=str,
+                        default=os.getenv("LLM_MODEL", "claude-sonnet-4-6"),
+                        help="Model to certify (default: LLM_MODEL env or claude-sonnet-4-6)")
+    parser.add_argument("--endpoint", type=str,
+                        default=os.getenv("LLM_BASE_URL", "https://api.openai.com/v1"),
+                        help="LLM API base URL (default: LLM_BASE_URL env)")
+    parser.add_argument("--max-concurrency", type=int, default=5,
+                        help="Max concurrent LLM calls (default: 5)")
+    # Default comes from cicd/thresholds.json so the model bar is reviewable in
+    # the same file as the agent gates, rather than being a constant here.
+    _default_threshold = model_gate_threshold()
+    parser.add_argument("--threshold", type=float, default=_default_threshold,
+                        help=f"Certification pass threshold "
+                             f"(default: {_default_threshold:.2f}, from "
+                             f"cicd/thresholds.json)")
+    parser.add_argument("--run-name", type=str, default=None,
+                        help="Custom run name (default: auto-generated)")
+    parser.add_argument("--evaluators", type=str, default="all",
+                        choices=["all", "accuracy", "compliance", "sentiment"],
+                        help="Which evaluators to use (default: all applicable)")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Preview dataset items without running experiments")
+    parser.add_argument("--queue-failures", action="store_true",
+                        help="Route failed items to the 'Certification Review' "
+                             "annotation queue for human review")
+    parser.add_argument("--ci", action="store_true",
+                        help="CI mode: exit with code 1 if certification fails")
+    parser.add_argument("--system-prompt-file", type=str, default=None,
+                        help="Path to a markdown file used verbatim as the LLM "
+                             "system message. Used to test domain-adapted "
+                             "variants like the finance-expert prompt.")
+    parser.add_argument("--label", type=str, default=None,
+                        help="Variant slug appended to the model name in "
+                             "metadata + run name (e.g. 'finance-expert'). "
+                             "Each labeled variant becomes a distinct row on "
+                             "the certification dashboard.")
+    return parser.parse_args()
+
+
+# --------------- LLM Clients ---------------
+
+def is_claude_native(model: str) -> bool:
+    """Check if model should use native Anthropic SDK."""
+    return model.startswith("claude") and anthropic is not None
+
+
+def call_anthropic_native(question: str, model: str, system: str = None,
+                          prompt=None) -> str:
+    """Call Claude via the native Anthropic SDK, traced as a generation.
+
+    Routed through ``agents.base.traced_generation`` so model-gate traces carry
+    model, token usage and cost (the raw client emits no spans), plus the link
+    to the managed ``prompt`` the question was compiled from.
+    """
+    from agents.base import traced_generation
+    return traced_generation(name="model-under-test", system=system, user=question,
+                             model=model, max_tokens=2048, prompt=prompt)
+
+
+def call_openai_compatible(question: str, model: str, endpoint: str, api_key: str,
+                           system: str = None) -> str:
+    """Call any model via OpenAI-compatible API with Langfuse auto-tracing."""
+    client = LangfuseOpenAI(base_url=endpoint, api_key=api_key)
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": question})
+    response = client.chat.completions.create(
+        model=model,
+        max_tokens=2048,
+        messages=messages,
+    )
+    return response.choices[0].message.content
+
+
+# --------------- Prompt Management ---------------
+
+# Hardcoded fallbacks used when Langfuse prompt management is unavailable.
+_FALLBACK_QA = (
+    "You are a financial analyst. Answer the question using ONLY the "
+    "provided source document excerpts. Be precise with numbers.\n\n"
+    "{{evidence}}\n\n"
+    "--- Question ---\n{{question}}"
+)
+
+_FALLBACK_SENTIMENT = (
+    "You are a financial analyst. Classify the sentiment of the following "
+    "financial text as exactly one of: positive, negative, or neutral.\n\n"
+    "Text: {{text}}\n\n"
+    "Respond with only the sentiment label."
+)
+
+
+def _get_prompt_template(name: str, fallback: str) -> str:
+    """Fetch a prompt template from Langfuse, falling back to hardcoded default."""
+    try:
+        langfuse = get_client()
+        prompt = langfuse.get_prompt(name, label="production", fallback=fallback)
+        return prompt
+    except Exception:
+        return None
+
+
+def _build_prompt(inp: dict) -> str:
+    """Build the full prompt text from a dataset item's input (see _build_prompt_with_ref)."""
+    return _build_prompt_with_ref(inp)[0]
+
+
+def _build_prompt_with_ref(inp: dict):
+    """Build the full prompt from a dataset item's input.
+
+    Returns ``(text, prompt_client_or_None)``: the managed prompt is returned
+    alongside the compiled text so the generation can be linked to its
+    version in Langfuse prompt management.
+
+    Fetches the prompt template from Langfuse prompt management (production label).
+    Falls back to hardcoded templates if Langfuse is unavailable.
+
+    If the input includes evidence (excerpts from financial filings),
+    uses the 'financial-qa' prompt. Otherwise, uses 'financial-sentiment'
+    for sentiment items, or returns the raw question.
+    """
+    question = inp.get("question", inp.get("text", ""))
+    evidence = inp.get("evidence", [])
+
+    if evidence and any(evidence):
+        context_parts = []
+        for i, ev in enumerate(evidence, 1):
+            if ev:
+                context_parts.append(f"--- Source Document Excerpt {i} ---\n{ev}")
+        context_block = "\n\n".join(context_parts)
+
+        prompt = _get_prompt_template("financial-qa", _FALLBACK_QA)
+        if prompt is not None:
+            return prompt.compile(evidence=context_block, question=question), prompt
+
+        # Direct fallback if prompt object failed
+        return (_FALLBACK_QA.replace("{{evidence}}", context_block)
+                .replace("{{question}}", question), None)
+
+    # Sentiment items (text-only, no evidence)
+    if "text" in inp and "question" not in inp:
+        prompt = _get_prompt_template("financial-sentiment", _FALLBACK_SENTIMENT)
+        if prompt is not None:
+            return prompt.compile(text=question), prompt
+        return _FALLBACK_SENTIMENT.replace("{{text}}", question), None
+
+    return question, None
+
+
+def create_certification_task(model: str, endpoint: str, api_key: str,
+                              system: str = None):
+    """Create a task function that calls the model under test.
+
+    The task function is called once per dataset item. It sends the input
+    to the model and returns the raw output text. If the dataset item
+    includes evidence from financial filings, it's included as context.
+    """
+    def task(*, item, **kwargs):
+        # Handle both DatasetItem (.input) and dict (["input"]) formats
+        inp = item.input if hasattr(item, 'input') else item.get("input", {})
+
+        if isinstance(inp, str):
+            inp = {"text": inp}
+
+        prompt, prompt_ref = _build_prompt_with_ref(inp)
+
+        if not prompt:
+            return "Error: no question found in dataset item"
+
+        # Route to appropriate LLM client
+        if is_claude_native(model):
+            return call_anthropic_native(prompt, model, system=system,
+                                         prompt=prompt_ref)
+        else:
+            return call_openai_compatible(prompt, model, endpoint, api_key,
+                                          system=system)
+
+    return task
+
+
+# --------------- Evaluator Selection ---------------
+
+def select_evaluators(evaluator_mode: str, dataset_name: str, threshold: float):
+    """Select item and run evaluators based on dataset type and mode."""
+    is_sentiment = "fpb" in dataset_name.lower()
+
+    item_evaluators = []
+    run_evaluators = []
+    primary_score = None
+
+    if evaluator_mode in ("all", "accuracy"):
+        if is_sentiment:
+            item_evaluators.append(sentiment_evaluator)
+            primary_score = "sentiment_accuracy"
+        else:
+            item_evaluators.append(numerical_accuracy_evaluator)
+            item_evaluators.append(exact_match_evaluator)
+            primary_score = "numerical_accuracy"
+
+    if evaluator_mode in ("all", "sentiment") and is_sentiment:
+        if sentiment_evaluator not in item_evaluators:
+            item_evaluators.append(sentiment_evaluator)
+            primary_score = primary_score or "sentiment_accuracy"
+
+    if evaluator_mode in ("all", "compliance"):
+        item_evaluators.append(regulatory_compliance_evaluator)
+
+    if evaluator_mode == "all":
+        item_evaluators.append(response_completeness_evaluator)
+
+    # LLM-as-a-Judge evaluators (for datasets with source evidence)
+    if evaluator_mode == "all" and not is_sentiment:
+        item_evaluators.append(groundedness_evaluator)
+        run_evaluators.append(average_score_evaluator("groundedness"))
+
+    # Run-level evaluators
+    if primary_score:
+        run_evaluators.append(average_score_evaluator(primary_score))
+        run_evaluators.append(certification_gate(primary_score, threshold))
+
+    return item_evaluators, run_evaluators, primary_score
+
+
+# --------------- Annotation Queue Routing ---------------
+
+
+def _queue_failed_items(item_results, primary_score):
+    """Route low-scoring traces to the annotation queue for human review.
+
+    An item is queued if its primary accuracy score is 0 or its groundedness
+    score is below 0.5. Requires the 'Certification Review' annotation queue
+    to exist (created by setup_annotation_queues.py). Delegates the REST plumbing
+    to cert_common.queue_failed_items.
+    """
+    def should_queue(evaluations):
+        for ev in evaluations:
+            if primary_score and ev.name == primary_score and ev.value == 0.0:
+                return True
+            if ev.name == "groundedness" and ev.value is not None and ev.value < 0.5:
+                return True
+        return False
+
+    queue_failed_items(item_results, should_queue)
+
+
+# --------------- Main ---------------
+
+def main():
+    args = parse_args()
+
+    # Load .env if available (override=True so .env takes precedence over shell env)
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(override=True)
+    except ImportError:
+        pass
+
+    # Validate credentials
+    api_key = os.getenv("LLM_API_KEY", os.getenv("OPENAI_API_KEY", ""))
+    if is_claude_native(args.model):
+        if not os.getenv("ANTHROPIC_API_KEY"):
+            print(f"Error: ANTHROPIC_API_KEY required for model {args.model}", file=sys.stderr)
+            sys.exit(1)
+    elif not api_key:
+        print("Error: LLM_API_KEY (or OPENAI_API_KEY) required", file=sys.stderr)
+        sys.exit(1)
+
+    # Initialize Langfuse
+    langfuse = get_client()
+
+    print("LLM Certification Runner", file=sys.stderr)
+    print("=" * 50, file=sys.stderr)
+    print(f"  Model:       {args.model}", file=sys.stderr)
+    print(f"  Endpoint:    {args.endpoint}", file=sys.stderr)
+    print(f"  Dataset:     {args.dataset}", file=sys.stderr)
+    print(f"  Threshold:   {args.threshold:.0%}", file=sys.stderr)
+    print(f"  Concurrency: {args.max_concurrency}", file=sys.stderr)
+
+    # Load dataset
+    try:
+        dataset = langfuse.get_dataset(args.dataset)
+        print(f"  Items:       {len(dataset.items)}", file=sys.stderr)
+    except Exception as e:
+        print(f"\nError loading dataset '{args.dataset}': {e}", file=sys.stderr)
+        print("Run setup_datasets.py first to create the dataset.", file=sys.stderr)
+        sys.exit(1)
+
+    if args.dry_run:
+        print("\n  ** DRY RUN - no experiments will be run **\n", file=sys.stderr)
+        for item in dataset.items:
+            inp = item.input if isinstance(item.input, dict) else {"raw": str(item.input)}
+            preview = inp.get("question", inp.get("text", str(inp)))[:80]
+            print(f"  [{item.id[:8]}] {preview}...", file=sys.stderr)
+        return
+
+    # Select evaluators
+    item_evaluators, run_evaluators, primary_score = select_evaluators(
+        args.evaluators, args.dataset, args.threshold
+    )
+    print(f"  Evaluators:  {[e.__name__ if hasattr(e, '__name__') else str(e) for e in item_evaluators]}", file=sys.stderr)
+
+    # Load optional system prompt (for domain-adapted variants like
+    # finance-expert). Read once; both LLM paths reuse the same string.
+    system_prompt = None
+    if args.system_prompt_file:
+        with open(args.system_prompt_file, "r", encoding="utf-8") as f:
+            system_prompt = f.read()
+        print(f"  System prompt: {args.system_prompt_file} "
+              f"({len(system_prompt)} chars)", file=sys.stderr)
+
+    # Compose the effective model identifier surfaced on the dashboard.
+    # When a --label is provided, the variant becomes its own row alongside
+    # the baseline (the portal groups by metadata.model).
+    label = (args.label or "").strip().strip("-") or None
+    effective_model = f"{args.model}-{label}" if label else args.model
+    prompt_variant = label or "baseline"
+
+    # Generate run name. Microsecond granularity guards against collisions
+    # when running the same model+dataset+label in parallel.
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+    if args.run_name:
+        run_name = args.run_name
+    elif label:
+        run_name = (
+            f"{args.model}-{label}-{args.dataset.split('/')[-1]}-{timestamp}"
+        )
+    else:
+        run_name = f"{args.model}-{args.dataset.split('/')[-1]}-{timestamp}"
+
+    # Run experiment
+    print(f"\n  Run name: {run_name}", file=sys.stderr)
+    if label:
+        print(f"  Variant:  {label}  (dashboard model: {effective_model})",
+              file=sys.stderr)
+    print(f"  Running experiment...\n", file=sys.stderr)
+
+    result = dataset.run_experiment(
+        name=args.dataset.split("/")[-1],
+        run_name=run_name,
+        description=(
+            f"Model certification: {effective_model} against {args.dataset}"
+        ),
+        task=create_certification_task(
+            args.model, args.endpoint, api_key, system=system_prompt
+        ),
+        evaluators=item_evaluators,
+        run_evaluators=run_evaluators,
+        max_concurrency=args.max_concurrency,
+        metadata={
+            "model": effective_model,
+            "base_model": args.model,
+            "prompt_variant": prompt_variant,
+            "system_prompt_file": args.system_prompt_file or "",
+            "endpoint": args.endpoint,
+            "dataset": args.dataset,
+            "dataset_version": dataset_version(dataset.items),
+            "dataset_item_count": len(dataset.items),
+            "threshold": args.threshold,
+            # The one score `threshold` judged (None: this mode ran no gate).
+            # Same key the live gate writes, so a reader never has to guess.
+            "gate": primary_score,
+            "evaluator_mode": args.evaluators,
+        },
+    )
+
+    # Print results
+    print("=" * 50, file=sys.stderr)
+    print("Results:", file=sys.stderr)
+    print(result.format(), file=sys.stderr)
+
+    # Print certification summary
+    print("\n" + "=" * 50, file=sys.stderr)
+    print("CERTIFICATION SUMMARY", file=sys.stderr)
+    print("=" * 50, file=sys.stderr)
+    print(f"  Model:     {args.model}", file=sys.stderr)
+    print(f"  Dataset:   {args.dataset}", file=sys.stderr)
+    print(f"  Threshold: {args.threshold:.0%}", file=sys.stderr)
+
+    for ev in result.run_evaluations:
+        if ev.name == "certification_result":
+            status = "PASSED" if ev.value == 1.0 else "FAILED"
+            print(f"  Result:    {status}", file=sys.stderr)
+            print(f"  Detail:    {ev.comment}", file=sys.stderr)
+            break
+    else:
+        print("  Result:    NO CERTIFICATION GATE CONFIGURED", file=sys.stderr)
+
+    for ev in result.run_evaluations:
+        if ev.name.startswith("avg_"):
+            print(f"  {ev.name}: {ev.comment}", file=sys.stderr)
+
+    # Run-level scores (certification_result, avg_*) are stored on the
+    # experiment by the SDK itself.
+    print(f"\nView in Langfuse (Experiments): "
+          f"{getattr(result, 'experiment_url', None) or args.dataset}", file=sys.stderr)
+
+    # Route failed items to annotation queue for human review
+    if args.queue_failures and result.item_results:
+        _queue_failed_items(result.item_results, primary_score)
+
+    # Flush
+    langfuse.flush()
+
+    # CI mode: exit with code 1 if certification failed
+    if args.ci:
+        for ev in result.run_evaluations:
+            if ev.name == "certification_result" and ev.value != 1.0:
+                sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
