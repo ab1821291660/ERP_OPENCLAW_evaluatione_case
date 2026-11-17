@@ -1,10 +1,12 @@
 
 
-
+【less但流程完整】OpenTelemetry追踪-jaeger的Trace可视化##===================================
 
 本地SQLite
 OpenTelemetry追踪observability--而不是langfuse  /             
-jaeger | 16686 | Trace 可视化 |
+jaeger | 16686 | Trace可视化 |
+
+
 
 
 
