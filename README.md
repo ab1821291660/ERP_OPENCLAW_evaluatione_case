@@ -7,19 +7,15 @@ OpenTelemetry追踪observability--而不是langfuse  /
 jaeger | 16686 | Trace可视化 |
 
 
-
-
-
 ## ----【见AGENT_HARNESS_PLATFORM_PLAN.md】13. 你在面试里该怎么讲这个项目
 你可以按下面这条线讲：
 1. 问题定义：Agent 最大问题不是“能不能回答”，而是“怎么稳定演进”
-2. 架构分层：runtime、tool gateway、eval、observability、infra
-3. 平台价值：把运行、评测、回归、观测串起来
+2. 架构分层：runtime、tool gateway、infra
+3. 平台价值：把运行、、、、观测observability、eval评测、 回归CIgate 串起来##===================================
 4. 工程取舍：第一版不做大 UI，优先把平台内核打通
 5. 安全意识：tool policy、sandbox、审计日志
-6. 生产思维：CI gate、K8s manifests、runbook、threat model
+6. 生产思维：CIgate、K8s manifests、runbook、threat model
 这样讲，会明显比“我做了个 agent”更像 AI Infra 工程师。
-
 
 
 ## ----【AI_RUNTIME_PLAYGROUND_BLUEPRINT.md】11. 简历项目描述版本
@@ -33,8 +29,6 @@ AI Infra / Runtime 系统项目｜C++、Python、FastAPI、OpenTelemetry
 - 规划共享内存 ring buffer 实验路径，用于对比普通队列与共享内存方案在任务传递场景下的性能差异。
 - 集成 tracing、benchmark 和回归评测思路，为后续 AI runtime 性能优化与 CI regression gate 打基础。
 ```
-
-
 ##=================================== ##===================================
 ##=================================== ##===================================
 ##=================================== ##===================================
