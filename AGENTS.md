@@ -3,7 +3,7 @@
 This repo is a **deployment gate** for LLMs and AI agents in financial services:
 it runs a model or a multi-step agent against golden datasets, scores every
 output, and produces a PASS/FAIL verdict with reviewable evidence in Langfuse.
-(See [README.md](README.md) for the full story and the
+(See [README.md](README-en.md) for the full story and the
 [companion blog post](https://langfuse.com/blog/2026-07-15-llm-certification-financial-services).)
 
 This file is the **golden path** to stand it up end to end. Follow it top to

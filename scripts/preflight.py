@@ -106,7 +106,7 @@ def check_langfuse_creds() -> tuple[str | None, str | None, str]:
         fail(
             f"Missing {missing}",
             "HUMAN STEP: create a Langfuse project and paste its API keys into .env. "
-            "Cloud: https://cloud.langfuse.com  |  Self-host: see selfhost/README.md.",
+            "Cloud: https://cloud.langfuse.com  |  Self-host: see selfhost/README-en.md.",
         )
     return pk, sk, host
 

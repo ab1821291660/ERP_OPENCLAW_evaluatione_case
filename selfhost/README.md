@@ -56,7 +56,7 @@ docker compose -f selfhost/docker-compose.yml logs -f langfuse-web langfuse-work
    LANGFUSE_BASE_URL=http://localhost:3000
    ```
 
-Then jump back to the main [README Quick Start](../README.md#quick-start) and
+Then jump back to the main [README Quick Start](../README-en.md#quick-start) and
 continue from step 2 (Load Sample Dataset).
 
 ## Stop / reset

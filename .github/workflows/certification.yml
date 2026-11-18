@@ -1,4 +1,4 @@
-# DISABLED on purpose: this repo carries no secrets (see cicd/README.md).
+# DISABLED on purpose: this repo carries no secrets (see cicd/README-en.md).
 # Recommended shape if you enable live gates in your own fork: Langfuse's
 # `langfuse/experiment-action` with an approved-baseline, per-case regression
 # policy (https://langfuse.com/docs/evaluation/experiments/experiments-ci-cd),

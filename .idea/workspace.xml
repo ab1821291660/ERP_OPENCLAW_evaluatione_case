@@ -5,20 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="15935d50-7d63-47b6-a42b-f9bf8b92008f" name="Changes" comment="ini">
-      <change afterPath="$PROJECT_DIR$/agents/baseBAK可观测.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cert_commonBAK为人工复核+gate----experiments--items--observations--scores.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cicdBAK为IC阈值json文档/1.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/evaluatorsBAK混合评估.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/promote_trace_to_datasetBAK生产回流到黄金数据集.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run_certificationBAK单次llm运行.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run_usecase_certificationBAK完整Agent多维系统行为--基线回退-运行均值之外-再抓过去通过现在失败的单项.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/preflightBAK预检-环境检查.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/recert_for_promptBAK自进化--Prompt变化再认证.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/setup_datasetsBAK黄金数据.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/v3----.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README-en.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/certification.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/certification.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/evaluators.py" beforeDir="false" afterPath="$PROJECT_DIR$/evaluators.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/v3--简单手册1118.md" beforeDir="false" afterPath="$PROJECT_DIR$/v3--简单手册1118.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AGENTS.md" beforeDir="false" afterPath="$PROJECT_DIR$/AGENTS.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README-ZH文件.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/preflight.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/preflight.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/selfhost/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/selfhost/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/v3----.md" beforeDir="false" afterPath="$PROJECT_DIR$/v3----.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,7 +81,7 @@
       <workItem from="1794823403220" duration="9198000" />
       <workItem from="1794907228253" duration="178000" />
       <workItem from="1794908253796" duration="4000" />
-      <workItem from="1794992978691" duration="6623000" />
+      <workItem from="1794992978691" duration="7022000" />
     </task>
     <task id="LOCAL-00001" summary="ini">
       <created>1794823509406</created>
@@ -165,7 +160,14 @@
       <option name="project" value="LOCAL" />
       <updated>1794994453110</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="ini">
+      <created>1795004932192</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1795004932192</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
