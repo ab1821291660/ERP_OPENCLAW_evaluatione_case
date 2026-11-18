@@ -333,7 +333,7 @@ def response_completeness_evaluator(*, output, **kwargs):
 # the calculator rule.
 TRAJECTORY_EXEMPTIONS = ("logical reasoning", "information extraction")
 
-TRAJECTORY_RULES = {
+TRAJECTORY_RULES = {##轨迹评估##===================================
     "numerical": "calculate",
     "sentiment": "route",
     "advisory": "compliance-self-check",
