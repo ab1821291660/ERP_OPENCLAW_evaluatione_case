@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="15935d50-7d63-47b6-a42b-f9bf8b92008f" name="Changes" comment="ini">
+      <change afterPath="$PROJECT_DIR$/.idea/ERP_OPENCLAW_evaluatione_case.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/v3--prompt1118.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/v3--简单手册1118.md" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="3MBULx4SXb0xnv0CpIAxXFZxI9K" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "true",
+    "last_opened_file_path": "D:/Github_romote/ERP_OPENCLAW_evaluatione_case",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Github_romote\ERP_OPENCLAW_evaluatione_case" />
+      <recent name="D:\Github_romote\ERP_OPENCLAW_evaluatione_case\app\evals\evaluators" />
+      <recent name="D:\Github_romote\ERP_OPENCLAW_evaluatione_case\app\tool_gateway" />
+      <recent name="D:\Github_romote\ERP_OPENCLAW_evaluatione_case\app\api\routers" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Github_romote\ERP_OPENCLAW_evaluatione_case\app\evals\dataset" />
+      <recent name="D:\Github_romote\ERP_OPENCLAW_evaluatione_case\app\evals\gate" />
+      <recent name="D:\Github_romote\ERP_OPENCLAW_evaluatione_case\app\evals\observability" />
+      <recent name="D:\Github_romote\ERP_OPENCLAW_evaluatione_case\app\evals\evaluators" />
+      <recent name="D:\Github_romote\ERP_OPENCLAW_evaluatione_case\app" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="15935d50-7d63-47b6-a42b-f9bf8b92008f" name="Changes" comment="" />
+      <created>1794823401757</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1794823401757</updated>
+      <workItem from="1794823403220" duration="9198000" />
+      <workItem from="1794907228253" duration="178000" />
+      <workItem from="1794908253796" duration="4000" />
+      <workItem from="1794992978691" duration="719000" />
+    </task>
+    <task id="LOCAL-00001" summary="ini">
+      <created>1794823509406</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1794823509406</updated>
+    </task>
+    <task id="LOCAL-00002" summary="ini">
+      <created>1794828245726</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1794828245726</updated>
+    </task>
+    <task id="LOCAL-00003" summary="ini">
+      <created>1794836196403</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1794836196403</updated>
+    </task>
+    <task id="LOCAL-00004" summary="ini">
+      <created>1794836381255</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1794836381255</updated>
+    </task>
+    <task id="LOCAL-00005" summary="ini">
+      <created>1794837548009</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1794837548009</updated>
+    </task>
+    <task id="LOCAL-00006" summary="ini">
+      <created>1794838634429</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1794838634429</updated>
+    </task>
+    <task id="LOCAL-00007" summary="ini">
+      <created>1794881419166</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1794881419166</updated>
+    </task>
+    <task id="LOCAL-00008" summary="ini">
+      <created>1794881522335</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1794881522335</updated>
+    </task>
+    <task id="LOCAL-00009" summary="ini">
+      <created>1794881690842</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1794881690842</updated>
+    </task>
+    <task id="LOCAL-00010" summary="ini">
+      <created>1794907277283</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1794907277283</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="ini" />
+    <option name="LAST_COMMIT_MESSAGE" value="ini" />
+  </component>
+</project>
